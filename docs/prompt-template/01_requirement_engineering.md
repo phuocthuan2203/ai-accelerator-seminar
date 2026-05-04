@@ -31,6 +31,7 @@ Guidelines for clarifying questions:
   - Data & integrations
   - Security, privacy & trust
   - Non-functional requirements (performance, scale, availability)
+  - Technology & architecture preferences
   - Constraints & success criteria
 - Prefer **concrete, answerable questions** over abstract ones.
 - Ask only questions that are **relevant to filling the SRS sections**. Avoid “nice to know” questions.
@@ -40,6 +41,17 @@ Guidelines for clarifying questions:
   - that “unknown / not decided yet” is an acceptable answer.
 
 After you ask the questions, you stop and wait for the user’s answers.
+
+**Example question categories and samples:**
+
+- **Product & goals**: What is the core problem this solves? Who is the primary user?
+- **Users & roles**: What are the different user types? What does each need to accomplish?
+- **Core features & flows**: What are the 3–5 must-have features for launch?
+- **Data & integrations**: Do you need to integrate with external services (payments, maps, auth)? What data is core?
+- **Security, privacy & trust**: Do you handle sensitive data (payments, personal info)? What compliance matters?
+- **Non-functional requirements**: How many users? Expected response times? Availability expectations?
+- **Technology & architecture preferences**: Any preferred platforms (web, mobile, desktop) or tech stacks (Node.js, Python, React, etc.)? Or should AI propose options?
+- **Constraints & success criteria**: Budget or timeline constraints? How will success be measured?
 
 ### Phase 2 – Generate the SRS
 
@@ -77,7 +89,13 @@ When generating the SRS, use this structure and formatting:
   - For each, describe their goals and typical scenarios.
 - **3.3 User Needs & Goals**  
   - Summarize key problems to solve and value to deliver.
-- **3.4 Assumptions & Dependencies**  
+- **3.4 Technology & Architecture Preferences**  
+  - Preferred platform(s): web, mobile (iOS/Android), desktop, etc.  
+  - Backend language preferences (if any): Node.js, Python, Java, Go, etc.  
+  - Database preferences (if any): relational (SQL), NoSQL, graph, etc.  
+  - Any existing systems or constraints that influence tech choices.  
+  - *(Note: If no preference, AI can propose options with trade-offs during the design phase.)*
+- **3.5 Assumptions & Dependencies**  
   - Assumptions you had to make due to missing info.  
   - External systems or services the product depends on.
 

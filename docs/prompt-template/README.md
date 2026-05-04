@@ -206,6 +206,56 @@ These templates were developed for a specific project and contain hardcoded refe
 
 ---
 
+## Project Structure Reference
+
+> **Fill this section in once when you start a new project.** The agent workflow and task files reference these definitions — you never need to edit them for structure changes. Only update this section.
+
+### Layers
+
+Define your project's layer structure here. The agent workflow will refer to these folder paths and responsibilities.
+
+| Layer | Folder path | Responsibilities |
+|-------|-------------|-----------------|
+| Domain | `backend/domain/` | Entities, value objects, domain logic (no HTTP or DB details) |
+| Application | `backend/application/` | Use-case services, interfaces for repositories and external adapters |
+| Infrastructure | `backend/infrastructure/` | ORM, migrations, repository implementations, external integrations |
+| API | `backend/api/` | Controllers, request/response DTOs, middleware, DI root |
+| Frontend | `frontend/` | UI layer (Angular app root) |
+
+**How to adapt this table:**
+- For a **monolith**: folder paths might be `src/Domain/`, `src/Application/`, etc.
+- For a **pure backend**: remove the Frontend row.
+- For **microservices**: repeat this table per service, with service-specific folder names.
+- For a **different language/framework**: keep the layer names (Domain, Application, etc.) but update the folder paths to match your project.
+
+### Commands
+
+Define your project's build, run, and test commands here.
+
+| Action | Command |
+|--------|---------|
+| Build backend | `cd backend && dotnet build` |
+| Run backend | `dotnet run --project backend/api/YourApiProject.csproj` |
+| Clean backend | `cd backend && dotnet clean && dotnet build` |
+| Run backend tests | `dotnet test ./backend/{layer}/Tests/{layer}.Tests.csproj` |
+| Build frontend | `cd frontend && npm run build` |
+| Run frontend dev | `cd frontend && npm start` |
+| Lint frontend | `cd frontend && npm run lint` |
+| Run frontend tests | `cd frontend && npm test` |
+| Run frontend tests (CI) | `cd frontend && ng test --watch=false --browsers=ChromeHeadless` |
+| Frontend coverage | `cd frontend && ng test --watch=false --code-coverage` |
+| Add DB migration | `dotnet ef migrations add {Name} -p backend/infrastructure/{InfraProject}.csproj -s backend/api/{ApiProject}.csproj` |
+| Apply DB migration | `dotnet ef database update -p backend/infrastructure/{InfraProject}.csproj -s backend/api/{ApiProject}.csproj` |
+
+**How to adapt this table:**
+- Replace `dotnet` commands with your runtime (e.g., `go build`, `cargo build`, `python -m pytest`)
+- Replace Angular/npm commands with your frontend tool (e.g., `npm`, `yarn`, `pnpm`)
+- Replace `backend/`, `frontend/` paths with your folder structure
+- Replace `.csproj` project names with your actual project file names
+- Add or remove rows to match your project's commands
+
+---
+
 ## Getting Started with the Prompts
 
 ### Quick Overview (Five Steps)

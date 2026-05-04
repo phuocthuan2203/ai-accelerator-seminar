@@ -16,17 +16,7 @@
 - Angular CLI: 20.3.5
 - Database: PostgreSQL 16 with `pgvector` extension (runs in Docker on a non-default port, e.g., 5434)
 
-Backend solution layout (convention):
-
-- `backend/`
-- `backend/api/`
-- `backend/application/`
-- `backend/domain/`
-- `backend/infrastructure/`
-
-Frontend layout (convention):
-
-- `frontend/` (Angular app root)
+**Before starting any task, read the Project Structure Reference section in `README.md`.** All layer names, folder paths, and build/run commands in this file refer to the definitions there. If the structure differs from what is shown below, your README takes precedence.
 
 ---
 
@@ -42,7 +32,7 @@ For every task, follow this order without deviation:
 
 1.5 **Read and internalize the Sequence Diagram Reference**
    - Read the Sequence Diagram Reference section in the task file completely.
-   - Understand the exact layer each step happens in (Presentation / API / Application / Domain / Infrastructure).
+   - Understand the exact layer each step happens in (layers defined in README.md Project Structure Reference).
    - Map each diagram step to the files and methods you will write.
    - If any step is ambiguous, missing layer labels, or conflicts with other task sections, **STOP immediately** and log it in PROGRESS.md Issues Log with specific evidence before writing any code.
    - **Critical rule:** You are not allowed to add logic that is not shown in the diagram, nor skip logic that is shown. The diagram is the contract.
@@ -63,31 +53,17 @@ For every task, follow this order without deviation:
 
 4. **Load environment & start services**
 
-   4.1 **Backend run commands (from repository root):**
-   ```bash
-   cd backend
-   dotnet build
-   dotnet run --project api/YourApiProject.csproj
-   ```
-
-   4.2 **Frontend run commands:**
-   ```bash
-   cd frontend
-   npm install         # first time only, or when deps change
-   npm start           # or `ng serve` with configured script
-   ```
+   Use the commands defined in README.md → **Project Structure Reference → Commands table**:
+   
+   4.1 **Backend**: Run the "Build backend" and "Run backend" commands
+   
+   4.2 **Frontend**: Run the "Run frontend dev" command
+   
+   (For first-time frontend setup, install dependencies first: `npm install` in the frontend folder)
 
 5. **When backend structure changes, ensure clean build before running**
-   - If the task modifies `backend/domain`, `backend/application`, or `backend/infrastructure`, run:
-     ```bash
-     cd backend
-     dotnet clean
-     dotnet build
-     ```
-   - Only then run the API:
-     ```bash
-     dotnet run --project api/YourApiProject.csproj
-     ```
+   - If the task modifies files in any of the Domain, Application, or Infrastructure layers (see README.md Project Structure Reference), run the "Clean backend" command from README.md before running the API.
+   - Then run the "Run backend" command to start the API.
 
 6. **Implement with tests (never implementation without tests)**
 
@@ -141,24 +117,26 @@ For every task, follow this order without deviation:
 
 ### Structure
 
-- `backend/domain`  
-  - Domain entities (User, ToolListing, BorrowRequest, Loan, Rating, IncidentReport, etc.).
-  - Value objects and business invariants.
-  - No HTTP or EF Core implementation details.
+> Layer folder paths are defined in README.md → **Project Structure Reference → Layers table.** Use that table as the authoritative source for where each layer's code lives. The responsibilities of each layer are:
 
-- `backend/application`  
+- **Domain Layer**  
+  - Domain entities and value objects (e.g., User, Course, Request).
+  - Business invariants and core logic.
+  - No HTTP or ORM implementation details.
+
+- **Application Layer**  
   - Use-case services and application orchestration.
   - Interfaces for repositories and external adapters (e.g., IUserRepository, IPasswordHasher, INotificationService).
   - Enforces business rules and coordinates domain/persistence boundaries.
 
-- `backend/infrastructure`  
-  - EF Core DbContext, migrations, repository implementations.
+- **Infrastructure Layer**  
+  - ORM DbContext, migrations, and repository implementations.
   - Persistence and external integration implementations.
   - Concrete implementations of application layer interfaces.
 
-- `backend/api`  
-  - ASP.NET Core controllers, request/response DTOs, and API wiring.
-  - Dependency injection configuration (Program.cs / composition root).
+- **API Layer**  
+  - Controllers, request/response DTOs, and API wiring.
+  - Dependency injection configuration and setup.
   - Middleware for validation, error handling, authentication/authorization, and rate limiting.
 
 ### Naming
@@ -240,12 +218,14 @@ Complete every check before moving to the next task. Do not skip.
 
 ### Backend
 
-- [ ] `cd backend && dotnet build` → **0 errors**
+> Use the commands from README.md → **Project Structure Reference → Commands table**.
+
+- [ ] Run the "Build backend" command → **0 errors**
 - [ ] For schema changes:
-  - [ ] New migrations created via `dotnet ef migrations add <Name> -p infrastructure/YourInfrastructureProject.csproj -s api/YourApiProject.csproj`
-  - [ ] `dotnet ef database update -p infrastructure/YourInfrastructureProject.csproj -s api/YourApiProject.csproj` runs without error
+  - [ ] New migrations created via the "Add DB migration" command
+  - [ ] "Apply DB migration" command runs without error
 - [ ] API starts cleanly:
-  - [ ] `cd backend && dotnet run --project api/YourApiProject.csproj`
+  - [ ] Run the "Run backend" command
 - [ ] Swagger / OpenAPI UI reachable (e.g., `http://localhost:{port}/swagger`).
 - [ ] For each new or modified endpoint:
   - [ ] Happy path tested manually (via Swagger/Postman).
@@ -253,9 +233,11 @@ Complete every check before moving to the next task. Do not skip.
 
 ### Frontend
 
-- [ ] `cd frontend && npm run lint` → **0 lint errors** (if lint configured).
-- [ ] `cd frontend && npm run build` → **0 build errors**.
-- [ ] `npm start` (or `ng serve`) launches without console errors.
+> Use the commands from README.md → **Project Structure Reference → Commands table**.
+
+- [ ] Run the "Lint frontend" command → **0 lint errors** (if lint configured).
+- [ ] Run the "Build frontend" command → **0 build errors**.
+- [ ] Run the "Run frontend dev" command — launches without console errors.
 - [ ] New or updated routes render without blank screens or JS errors.
 - [ ] Forms show validation messages and disable/enable buttons according to design.
 
@@ -329,14 +311,14 @@ test(application): cover cooldown rule for assessment retry
 
 Every layer has a corresponding test type. Write the correct type — do not substitute.
 
-| Layer                          | Project folder         | Test location                         | Test type                         |
-|--------------------------------|------------------------|---------------------------------------|-----------------------------------|
-| Domain (pure entities/value objects) | `backend/domain`    | `backend/domain/Tests/...` (if needed) | xUnit tests for non-trivial logic |
-| Application (services/use cases)| `backend/application` | `backend/application/Tests/...`      | xUnit with mocks (e.g., Moq)      |
-| Infrastructure (repositories, integrations) | `backend/infrastructure` | `backend/infrastructure/Tests/...` | xUnit + EF Core InMemory / test DB |
-| API (controllers, filters, middleware) | `backend/api`     | `backend/api/Tests/...`             | xUnit + WebApplicationFactory / TestServer |
-| Angular service                | `frontend`             | Same folder: `<name>.service.spec.ts` | Jasmine + HttpClientTestingModule |
-| Angular component              | `frontend`             | Same folder: `<name>.component.spec.ts` | Jasmine + Angular TestBed         |
+| Layer                          | Project folder (see README) | Test location | Test type                         |
+|--------------------------------|--|--|-----------------------------------|
+| Domain (pure entities/value objects) | Domain layer folder | `{Domain layer folder}/Tests/...` | xUnit tests for non-trivial logic |
+| Application (services/use cases)| Application layer folder | `{Application layer folder}/Tests/...` | xUnit with mocks (e.g., Moq) |
+| Infrastructure (repositories, integrations) | Infrastructure layer folder | `{Infrastructure layer folder}/Tests/...` | xUnit + EF Core InMemory / test DB |
+| API (controllers, filters, middleware) | API layer folder | `{API layer folder}/Tests/...` | xUnit + WebApplicationFactory / TestServer |
+| Frontend service | Frontend layer folder | Same folder: `<name>.service.spec.ts` | Jasmine + HttpClientTestingModule |
+| Frontend component | Frontend layer folder | Same folder: `<name>.component.spec.ts` | Jasmine + Angular TestBed |
 
 The test folder structure should mirror the backend project folders and namespaces.
 
@@ -359,22 +341,13 @@ Run all three gates in order after writing the test file(s). A task cannot be ha
 
 **Backend:**
 
-```bash
-cd backend
-# Run all backend unit tests for the touched projects
-dotnet test ./api/Api.Tests/Api.Tests.csproj
-dotnet test ./application/Application.Tests/Application.Tests.csproj
-dotnet test ./infrastructure/Infrastructure.Tests/Infrastructure.Tests.csproj
-```
+Run the "Run backend tests" command from README.md → **Project Structure Reference → Commands table** for each touched layer.
 
-Expected: all relevant backend test projects build and run, with 0 failed tests.
+Expected: all relevant test projects build and run, with 0 failed tests.
 
 **Frontend:**
 
-```bash
-cd frontend
-npm test         # or `ng test --watch=false --browsers=ChromeHeadless`
-```
+Run the "Run frontend tests" command from README.md → **Project Structure Reference → Commands table** (or the CI variant for headless runs).
 
 Expected: specs run with 0 failures.
 
@@ -387,8 +360,8 @@ Additional checks:
 
 If coverage tooling is configured:
 
-- Backend: use `dotnet test` with Coverlet or equivalent to generate coverage for touched projects.
-- Frontend: use Angular’s coverage output (`ng test --watch=false --code-coverage`).
+- Backend: use the "Run backend tests" command with coverage tool (e.g., Coverlet) as per your project setup.
+- Frontend: use the "Frontend coverage" command from README.md → **Project Structure Reference → Commands table**.
 
 Minimum expectations (guideline):
 

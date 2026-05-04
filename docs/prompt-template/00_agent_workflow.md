@@ -10,7 +10,7 @@
 
 - OS: Linux (Ubuntu 25.10)
 - Docker: Docker Engine (with `docker compose` plugin, not legacy `docker-compose`)
-- .NET SDK: 8.0.x (LTS)
+- .NET SDK: 9.0.x (LTS)
 - Node.js: v22.20.0 via NVM 0.40.3
 - npm: 10.9.3
 - Angular CLI: 20.3.5
@@ -53,16 +53,16 @@ For every task, follow this order without deviation:
 
 4. **Load environment & start services**
 
-   Use the commands defined in README.md → **Project Structure Reference → Commands table**:
+   Use the commands defined in the root README.md → **Project Structure Reference → Commands table**:
    
    4.1 **Backend**: Run the "Build backend" and "Run backend" commands
    
    4.2 **Frontend**: Run the "Run frontend dev" command
    
-   (For first-time frontend setup, install dependencies first: `npm install` in the frontend folder)
+   (For first-time frontend setup, install dependencies first: use your package manager per the Commands table)
 
 5. **When backend structure changes, ensure clean build before running**
-   - If the task modifies files in any of the Domain, Application, or Infrastructure layers (see README.md Project Structure Reference), run the "Clean backend" command from README.md before running the API.
+   - If the task modifies files in any of the Domain, Application, or Infrastructure layers (see root README.md Project Structure Reference), run the "Clean backend" command from the root README.md before running the API.
    - Then run the "Run backend" command to start the API.
 
 6. **Implement with tests (never implementation without tests)**
@@ -117,7 +117,7 @@ For every task, follow this order without deviation:
 
 ### Structure
 
-> Layer folder paths are defined in README.md → **Project Structure Reference → Layers table.** Use that table as the authoritative source for where each layer's code lives. The responsibilities of each layer are:
+> Layer folder paths are defined in the root README.md → **Project Structure Reference → Layers table.** Use that table as the authoritative source for where each layer's code lives. The responsibilities of each layer are:
 
 - **Domain Layer**  
   - Domain entities and value objects (e.g., User, Course, Request).
@@ -218,7 +218,7 @@ Complete every check before moving to the next task. Do not skip.
 
 ### Backend
 
-> Use the commands from README.md → **Project Structure Reference → Commands table**.
+> Use the commands from the root README.md → **Project Structure Reference → Commands table**.
 
 - [ ] Run the "Build backend" command → **0 errors**
 - [ ] For schema changes:
@@ -233,7 +233,7 @@ Complete every check before moving to the next task. Do not skip.
 
 ### Frontend
 
-> Use the commands from README.md → **Project Structure Reference → Commands table**.
+> Use the commands from the root README.md → **Project Structure Reference → Commands table**.
 
 - [ ] Run the "Lint frontend" command → **0 lint errors** (if lint configured).
 - [ ] Run the "Build frontend" command → **0 build errors**.
@@ -311,7 +311,7 @@ test(application): cover cooldown rule for assessment retry
 
 Every layer has a corresponding test type. Write the correct type — do not substitute.
 
-| Layer                          | Project folder (see README) | Test location | Test type                         |
+| Layer                          | Project folder (see root README) | Test location | Test type                         |
 |--------------------------------|--|--|-----------------------------------|
 | Domain (pure entities/value objects) | Domain layer folder | `{Domain layer folder}/Tests/...` | xUnit tests for non-trivial logic |
 | Application (services/use cases)| Application layer folder | `{Application layer folder}/Tests/...` | xUnit with mocks (e.g., Moq) |
@@ -341,7 +341,7 @@ Run all three gates in order after writing the test file(s). A task cannot be ha
 
 **Backend:**
 
-Run the "Run backend tests" command from README.md → **Project Structure Reference → Commands table** for each touched layer.
+Run the "Run backend tests" command from the root README.md → **Project Structure Reference → Commands table** for each touched layer.
 
 Expected: all relevant test projects build and run, with 0 failed tests.
 

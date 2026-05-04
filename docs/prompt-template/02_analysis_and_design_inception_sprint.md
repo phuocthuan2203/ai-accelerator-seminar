@@ -36,12 +36,19 @@ You will receive a **Software Requirements Specification (SRS)** from the previo
    - Data model outline (SRS Section 6)
 
 2. **Do NOT re-ask about topics the SRS already covers**:
-   - Technology stack or platform preferences
-   - Performance or scalability targets
-   - Authentication method or compliance requirements
-   - Scope and out-of-scope items
-   - User roles and their basic permissions
-   - Sensitive data fields and general security concerns
+   - Technology stack or platform preferences (SRS §3.4)
+   - Performance expectations and response times (SRS §5)
+   - Scalability targets and expected user counts (SRS §5)
+   - Availability / uptime targets (SRS §5)
+   - Geographic, latency, or time zone constraints (SRS §5)
+   - Authentication mechanism and login flow (SRS §5)
+   - Regulatory, compliance, or legal requirements (SRS §5)
+   - Sensitive data fields and how they must be protected (SRS §5)
+   - User roles and their basic permissions (SRS §3.2)
+   - Out-of-scope features and explicit constraints (SRS §2.2)
+   - External integrations and third-party services (SRS §6)
+   - Data lifecycle: data retention, backup, archival (SRS §5 or §6)
+   - Soft-delete vs hard-delete strategy for user/business data (if mentioned in SRS §5 or §6)
 
 3. **DO ask only about design-specific details** not covered in SRS:
    - Architectural style and rationale (layered, microservices, event-driven, hexagonal, etc.)

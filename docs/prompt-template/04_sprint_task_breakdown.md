@@ -170,11 +170,40 @@ Use this general order (adapt to the project’s architecture):
    - components, views, containers
 7. Frontend routing & navigation wiring
 
-Also:
+**Dependency rules:**
 
 - If a later-layer task depends on a rule being settled earlier, the earlier task must introduce that **contract** first.
   - Example: cooldown state and remaining-attempts logic must exist in domain/application/API contracts before UI tasks that render “Try again in 2:34:12”.
   - Example: new DTO fields must be defined and tested in backend before UI tasks that display them.
+
+### Parallel execution (optional optimization)
+
+While the ordering rule ensures logical sequencing, **some tasks can run concurrently** if dependencies are clearly documented in PROGRESS.md:
+
+**Safe parallel patterns:**
+
+- **Domain + Migrations** can run in parallel:
+  - Domain layer entities are tested in isolation (no DB needed).
+  - Database migration can be written in parallel and applied once entity contracts are clear.
+  - Document in “What NEXT task must know”: which tables/columns are created, their types, and constraints.
+
+- **Backend API contracts (controllers + DTOs) can be finalized before Frontend services start:**
+  - Publish API endpoint contracts (URLs, request/response schemas) in a shared document.
+  - Frontend service task uses these contracts to write HttpClient wrappers and mock tests.
+  - Backend API task implements endpoints; frontend task writes the service layer that calls them.
+  - Document in “What NEXT task must know”: exact API route, HTTP method, request body schema, response codes + payloads.
+
+- **Frontend service layer + Frontend presentation layers can run in parallel:**
+  - Service layer defines the API (what methods return what observables/promises).
+  - Presentation layer uses services via dependency injection.
+  - Both tasks must coordinate on service method signatures.
+
+**When to use parallel execution:**
+- Multi-agent or multi-developer scenarios where you want to maximize throughput.
+- Dependencies are crystal-clear and documented (not assumed).
+- Tasks have no shared file ownership (avoid merge conflicts).
+
+**Guideline:** If in doubt, use sequential ordering. Parallelization is an optimization; correctness and clarity come first.
 
 ### Test inclusion rule
 
@@ -188,6 +217,29 @@ You do not need to prescribe specific frameworks (JUnit vs xUnit vs Jasmine); in
 - “Unit tests for service X verifying rules A, B, C”
 - “Integration test for endpoint Y verifying HTTP codes and payload shape”
 - “Component test for UI Z verifying states and error displays”
+
+**Test Granularity by Layer:**
+
+Use this matrix to determine which files/layers require tests in each task:
+
+| Layer | Test Required? | Granularity | Example |
+|-------|---|---|---|
+| **Domain entities** | Only if non-trivial logic | Per aggregate root or entity class | `User` entity with business logic (validation, state transitions) → test. Simple POCO with properties only → skip. |
+| **Domain value objects** | Yes if behavior exists | Per value object class | `Money` (with currency validation) → test. Simple enum → skip. |
+| **Domain exceptions** | No | N/A | Just define; no test needed. |
+| **Application services** | **Always** | One test file per service class | `UserService` → `UserServiceTests`. Multiple services in one file → separate test classes. |
+| **Application DTOs** | No | N/A | DTOs are data containers; validation is tested in controller/service tests. |
+| **Infrastructure repositories** | **Always (integration)** | One test file per repository or aggregate | `UserRepository` → `UserRepositoryTests` (uses test DB or in-memory EF). |
+| **Infrastructure external adapters** | **Always** | Per adapter (mock external service) | `PaymentGatewayAdapter` → test with mocked HTTP responses. |
+| **API controllers** | **Always (integration)** | One test file per controller or per feature endpoint | `AuthController` → `AuthControllerTests` (uses TestServer or WebApplicationFactory). |
+| **API DTOs / validators** | Covered by controller tests | N/A | Validated as part of controller endpoint tests. |
+| **API middleware / filters** | **Always** | Per middleware or filter class | `JwtAuthMiddleware` → test happy path + invalid token cases. |
+| **Frontend services** | **Always** | Per service file | `AuthService` → `auth.service.spec.ts` (mocks HttpClient). |
+| **Frontend components (form-based)** | **Always** | Per component | `LoginComponent` → `login.component.spec.ts` (tests form state, validation, submission). |
+| **Frontend components (display-only)** | **Consider** | Per component if interactive; optional if pure display | `CourseCardComponent` (just displays data) → optional. `CourseFilterComponent` (handles input) → required. |
+| **Frontend guards** | **Always** | Per guard | `AuthGuard` → `auth.guard.spec.ts`. |
+
+**Decision Rule:** If a file contains business logic (validation, state transitions, orchestration, external calls), it **must** have tests. If it's purely data transfer or simple display, tests are optional but encouraged for components.
 
 ---
 
@@ -211,20 +263,25 @@ Read these before implementing. Do not proceed without consulting them.
 | `docs/sprint-N/Sprint-N-Design-Document.md`      | Section Y — <name>          | API / data / UI references             |
 | <optional: other docs>                           | …                            | …                                      |
 
-## Sequence Diagram Reference
+## Sequence Diagram Reference (MANDATORY — Read Before Any Code)
 
 **Sprint Design Doc section:** §4 — Detailed Sequence Diagrams  
 **Relevant flow(s):** [BF-N / AF-N / UC-N IDs in this task]
 
-> **CRITICAL:** Copy and paste the PlantUML source (or ASCII text representation) for the flow(s) this task implements directly from the Sprint Design Document below.
+> **🛑 CRITICAL BLOCKER:** This section is mandatory. If it is missing, incomplete (no layer labels), or ambiguous, **STOP immediately** and do not proceed to implementation. Log the issue in PROGRESS.md Issues Log and request clarification.
 >
-> **You MUST follow this diagram exactly:**
-> - Do not add steps, endpoints, or side effects not shown here.
-> - Do not skip steps or branches shown here (including alt/else/error paths).
-> - If a step implies a DB write, infrastructure call, async job, or state change, implement it in the exact layer shown in the diagram.
-> - If you believe the diagram is incorrect or incomplete, **STOP** immediately and log it in PROGRESS.md Issues Log with evidence before proceeding with any code.
+> Copy and paste the PlantUML source (or ASCII text representation) for the flow(s) this task implements directly from the Sprint Design Document.
 >
-> This diagram is your guardrail. Deviating from it is a design misalignment.
+> **You MUST follow this diagram exactly. This is your contract:**
+> - ✅ Implement every step shown.
+> - ✅ Map each step to the exact layer and file shown.
+> - ❌ Do not add steps, endpoints, or side effects not shown here.
+> - ❌ Do not skip steps or branches shown here (including alt/else/error paths).
+> - ✅ If a step implies a DB write, infrastructure call, async job, or state change, implement it in the exact layer shown.
+>
+> **If you find a conflict** between this diagram and the Design Rule Checklist: **STOP** immediately and log it in PROGRESS.md Issues Log with specific evidence before proceeding.
+>
+> Deviating from this diagram is a **design misalignment**. Your goal is fidelity to the design, not creative interpretation.
 
 [Paste diagram here]
 
@@ -415,20 +472,74 @@ This ensures the next session's agent has concrete, actionable context about sys
 Example:
 > **Status:** ✅ Done
 >
-> **What now exists:**
-> - Files: `backend/application/Services/UserService.cs` (CREATE), `backend/api/Controllers/AuthController.cs` (MODIFY), `backend/api/Tests/AuthControllerTests.cs` (CREATE)
-> - Classes: `UserService` (Application), `AuthController` (API), `UserDto` (API)
-> - DI: `Program.cs: services.AddScoped<IUserService, UserService>()`
-> - Migrations: `Migration_0001_CreateUsersTable`: users(id PK, email UNIQUE, password_hash, status VARCHAR, created_at TIMESTAMP)
-> - Env vars: `appsettings.json: JwtSecret`, `JwtExpiryMinutes`
-> - Feature flags: `FeatureFlags.EmailVerificationRequired = true` (appsettings.json)
+> **What now exists (be specific—next task depends on this):**
+> - Files created/modified: 
+>   - `backend/Domain/Users/User.cs` (CREATE)
+>   - `backend/Domain/Users/Exceptions/InvalidPasswordException.cs` (CREATE)
+>   - `backend/Application/Interfaces/IUserRepository.cs` (CREATE) — interface only, not implemented
+>   - `backend/Application/Services/UserService.cs` (CREATE)
+>   - `backend/Infrastructure/Repositories/UserRepository.cs` (CREATE)
+>   - `backend/Infrastructure/Migrations/Migration_0001_CreateUsersTable.cs` (CREATE)
+>   - `backend/Api/Controllers/AuthController.cs` (CREATE)
+>   - `backend/Api/Dtos/RegisterRequestDto.cs` (CREATE)
+>   - `backend/Api/Tests/AuthControllerTests.cs` (CREATE)
+>   - `frontend/src/app/core/services/auth.service.ts` (CREATE)
+>   - `frontend/src/app/features/auth/login.component.ts` (CREATE)
 >
-> **What NEXT task must know:**
-> - `IPasswordHasher` interface is defined in `backend/application/Interfaces/` but NOT implemented yet — next task must add `BcryptPasswordHasher` in `backend/infrastructure/`
-> - `users.status` is seeded with "Pending" by default — next task that implements email verification must transition this to "Active"
-> - `AuthController` now validates JWT; next task calling it must include Authorization header
+> - Classes/interfaces introduced:
+>   - `User` (Domain) — aggregate root with fields: id, email, password_hash, status, created_at
+>   - `IUserRepository` (Application) — interface with method signatures: `Task<User> GetByEmailAsync(string email)`, `Task SaveAsync(User user)`, `Task<User> GetByIdAsync(UserId id)`
+>   - `UserService` (Application) — with methods: `Task<RegisterResultDto> RegisterUserAsync(RegisterInputDto input)`, `Task<bool> ValidatePasswordAsync(UserId userId, string password)`
+>   - `UserRepository` (Infrastructure) — EF Core implementation of `IUserRepository`
+>   - `AuthController` (API) — with endpoints: `[HttpPost("register")] RegisterAsync(RegisterRequestDto)`, `[HttpPost("login")] LoginAsync(LoginRequestDto)`
+>   - `RegisterRequestDto` (API) — DTO with fields: email, password, password_confirm
 >
-> **Deviations:**
+> - DI registrations added:
+>   - `Program.cs: services.AddScoped<IUserRepository, UserRepository>()`
+>   - `Program.cs: services.AddScoped<UserService>()`
+>
+> - DB migrations applied:
+>   - `Migration_0001_CreateUsersTable.cs`: creates `users` table with columns:
+>     - `id` (UUID, PK)
+>     - `email` (VARCHAR(255), UNIQUE NOT NULL)
+>     - `password_hash` (VARCHAR(255), NOT NULL)
+>     - `status` (VARCHAR(20), DEFAULT 'Pending', NOT NULL) — enum values: Pending, Active, Locked
+>     - `created_at` (TIMESTAMP, DEFAULT now(), NOT NULL)
+>     - `updated_at` (TIMESTAMP, DEFAULT now(), NOT NULL)
+>
+> - Env vars / config keys added:
+>   - `appsettings.json: JwtSecretKey` (string, required for token signing)
+>   - `appsettings.json: JwtExpiryMinutes` (int, default 60)
+>   - `environment.ts: API_BASE_URL` (string, e.g., `http://localhost:5000`)
+>
+> - Feature flags set:
+>   - `FeatureFlags.EmailVerificationRequired = false` (appsettings.json) — email verification is not enforced yet; will be implemented in Sprint 2
+>
+> - Message queues / SignalR: None in this task
+>
+> **What the NEXT task must know (forward-looking dependencies):**
+> - **Undefined contracts waiting for implementation:**
+>   - `IUserRepository` is fully defined with method signatures but NOT implemented — next task MUST implement it in `backend/Infrastructure/Repositories/UserRepository.cs` with EF Core DbSet access
+>   - `IPasswordHasher` interface does NOT exist yet — if next task needs password validation, create it in `backend/Application/Interfaces/IPasswordHasher.cs` with signature: `Task<string> HashAsync(string password)`, `Task<bool> VerifyAsync(string plaintext, string hash)`
+>
+> - **Partial integrations:**
+>   - `UserService.RegisterUserAsync()` calls `_repository.SaveAsync(user)` but the repository is NOT injected yet — ensure `Program.cs` DI registration is applied before running
+>   - `AuthController.RegisterAsync()` validates input but does NOT call `UserService` yet — it's stubbed with a placeholder return
+>
+> - **Schema assumptions for next task:**
+>   - `users.status` defaults to 'Pending' — if next task implements email verification, transition 'Pending' → 'Active' only after email confirmation
+>   - DO NOT add another status column (e.g., `email_verified_at`) — use the existing `status` enum
+>   - DO NOT change the `users` table structure without updating the migration
+>
+> - **Feature flag state:**
+>   - `FeatureFlags.EmailVerificationRequired = false` — email verification gates are NOT active yet
+>   - If next task enables email verification, update this flag to `true` AND register the dependency: `services.AddScoped<IEmailSender>` before enabling
+>
+> - **Tests written:**
+>   - Unit tests in `AuthControllerTests.cs` cover: happy path registration, duplicate email rejection, password validation
+>   - Integration tests NOT written yet — if next task adds repositories, add integration tests for DB interactions
+>
+> **Deviations from design:**
 > - None
 
 ***

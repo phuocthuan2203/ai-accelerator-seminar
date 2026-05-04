@@ -31,29 +31,40 @@ Implemented, tested code
 (Repeat steps 3–5 for next sprint)
 ```
 
-## What Changed (vs. Previous Version)
+## What Changed (v2.1 → v2.2, 2026-05-04)
 
 This version addresses three critical issues discovered in real projects:
 
-### Issue 1: Design Misalignment (Fixed by embedding sequence diagrams)
+### [IMPLEMENTED] Issue 1: Design Misalignment (Fixed by embedding sequence diagrams)
 **Problem:** Agents silently skip rules or contradict the design.
 **Root cause:** No hard link between the design document and the task file.
-**Solution:** Task files now include a mandatory **Sequence Diagram Reference** section that embeds the exact diagram from the Sprint Design Document. Agents must follow it step-by-step or raise issues immediately.
+**Status:** ✅ **IMPLEMENTED** — Task files now include a mandatory **Sequence Diagram Reference** section that embeds the exact diagram from the Sprint Design Document. Enforcement strengthened: agents must stop if diagram is missing and follow it exactly or raise issues immediately (see Fix 2 in Audit).
 
-### Issue 2: Task Files Too Broad (Fixed by precise specifications)
+### [IMPLEMENTED] Issue 2: Task Files Too Broad (Fixed by precise specifications)
 **Problem:** Implementation Skeleton, Rule Checklist, Edge Cases, and Affected Files all allowed inference, causing different agents to make different assumptions.
-**Solution:** 
+**Status:** ✅ **IMPLEMENTED** — 
 - **Rule Checklist** now requires: exact rule (verbatim), source citation (§X.Y or diagram step), AND proposed test name.
-- **Implementation Skemust update leton** now shows: full class names, exact method signatures (parameter types + return types), and explicit "must NOT do" guards.
+- **Implementation Skeleton** now shows: full class names, exact method signatures (parameter types + return types), and explicit "must NOT do" guards.
 - **Edge Cases** now specify: trigger input (exact value), expected output (HTTP code + JSON shape), and traceability to a rule row.
 - **Affected Files** now include: "Must-contain" checklist of class/method names as verification checkpoints.
 
-### Issue 3: Poor Handoff Quality (Fixed by structured output)
+### [PARTIAL → IMPLEMENTED] Issue 3: Poor Handoff Quality (Fixed by structured output)
 **Problem:** Agents wrote generic summaries ("service layer implemented") and missed forward-looking dependencies (new interfaces, DI registrations, migrations).
-**Solution:** PROGRESS.md handoff is now a **structured checklist**:
-- **What now exists:** Exact file paths, class names, DI registrations, migrations, env vars, flags, message queues.
-- **What NEXT task must know:** Explicit forward-looking dependencies (unimplemented interfaces, schema assumptions, config expectations).
+**Previous Status:** PARTIAL — PROGRESS.md structure existed but examples lacked concrete detail.
+**Updated Status:** ✅ **IMPLEMENTED** — PROGRESS.md handoff is now a **structured checklist** with rich examples (see Fix 3 in Audit):
+- **What now exists:** Exact file paths, class names, method signatures, DI registrations, migrations, env vars, flags, message queues.
+- **What NEXT task must know:** Explicit forward-looking dependencies (unimplemented interfaces, partial integrations, schema assumptions, feature flag state, tests written).
 - **Deviations:** Any deviation from design with reason.
+
+---
+
+## Additional Fixes in v2.2
+
+**Fix 4:** Expanded "Do NOT re-ask" list in Inception prompt (now 12 items, was 6).  
+**Fix 5:** Added test granularity matrix to Task Breakdown (clarifies what tests are required per layer).  
+**Fix 6:** Added alt/error branch checklist to Sprint Design (ensures diagrams are complete).  
+**Fix 7:** Added parallel execution guidance to Task Breakdown (tasks can run concurrently if dependencies are clear).  
+**Fix 8:** Added tech-stack translation quick-reference to README (helps teams adapt templates to different stacks).
 
 ---
 
@@ -115,6 +126,53 @@ These templates are portable—they work for any tech stack. However, they do re
    | **Authentication** | `00_agent_workflow.md` Section 2 (Code Rules, Security) | Change `JWT + HttpContext` to your auth mechanism |
    | **Naming conventions** | All files | Change namespace patterns, class/method naming to your language's idioms |
    | **Personalization** | `00_agent_workflow.md` Steps 0 and 10 | Update "HI BOSS THUAN" and merge instructions to your team |
+
+### Tech Stack Translation Quick-Reference
+
+To save time adapting templates for your stack, use this translation table to find equivalent terms and patterns:
+
+#### Stack: Node.js + React + PostgreSQL
+
+| Component | ASP.NET Core + Angular (Template Default) | Node.js + React Equivalent | How to Adapt |
+|-----------|-------|-----|---|
+| **Backend async pattern** | `public async Task<T> MethodAsync(...)` | `async function method(...): Promise<T>` | Replace Task syntax with Promise; keep async/await semantics the same |
+| **Frontend component** | `export class UserListComponent { ... }` (NgModules) | `export function UserList() { ... }` (functional) | Use React function components instead of class-based Angular components |
+| **HTTP client** | `HttpClient.GetAsync(url)` | `fetch(url)` or `axios.get(url)` | Replace HttpClient with your HTTP library; adjust response parsing |
+| **ORM / queries** | `DbSet<User>.Where(...).ToListAsync()` | `db.query('SELECT * FROM users WHERE ...')` (raw SQL) or `sequelize.User.findAll(...)` | Use your ORM's query API; ensure you still parameterize queries |
+| **Migrations** | `dotnet ef migrations add CreateUsersTable` | `npm run db:migrate` or `knex migrate:make create_users_table` | Use your migration tool; ensure schema is version-controlled |
+| **Testing (backend)** | `xUnit` + `Moq` + `WebApplicationFactory` | `Jest` + `supertest` (for HTTP integration tests) | Adapt test runner and mocking library; keep test structure the same |
+| **Testing (frontend)** | `Jasmine` + `TestBed` | `Jest` + `React Testing Library` | Adapt component testing library; test user behavior, not implementation |
+| **DI container** | `.NET built-in DI` (Program.cs) | Manual DI or lightweight library (tsyringe, inversify) | Ensure services are registered before use; keep layering discipline |
+| **Env config** | `appsettings.json` + `IConfiguration` | `.env` file + `process.env` or `dotenv` | Load config at startup; never hardcode secrets |
+| **Auth mechanism** | `JWT` in `Authorization` header, validated in middleware | `JWT` in `Authorization` header, validated in Express middleware | Semantics are the same; library differs |
+
+#### Stack: Java + Vue.js + PostgreSQL
+
+| Component | ASP.NET Core + Angular (Template Default) | Java + Vue.js Equivalent | How to Adapt |
+|-----------|-------|-----|---|
+| **Backend async pattern** | `public async Task<T> MethodAsync(...)` | `public CompletableFuture<T> method(...)` or `public Mono<T> method(...)` (reactive) | Java's CompletableFuture or Spring WebFlux Mono is analogous to Task; maintain non-blocking semantics |
+| **Frontend component** | `export class UserListComponent { ... }` | `<template> ... export default { ... }</template>` (Single File Component) | Vue's SFC syntax is different; composition and state management logic is similar |
+| **HTTP client** | `HttpClient.GetAsync(url)` | `restTemplate.getForObject(url, UserDto.class)` or `WebClient.get()` | Spring RestTemplate (blocking) or WebClient (reactive); adjust response handling |
+| **ORM / queries** | `DbSet<User>.Where(...).ToListAsync()` | `userRepository.findAll()` (Spring Data JPA) or `session.createQuery(...)` (Hibernate) | Leverage your ORM's query API; ensure lazy loading vs eager loading is intentional |
+| **Migrations** | `dotnet ef migrations add CreateUsersTable` | `Liquibase` or `Flyway` changeset files | Version-control schema; use your migration tool's syntax |
+| **Testing (backend)** | `xUnit` + `Moq` + `WebApplicationFactory` | `JUnit` + `Mockito` + `@SpringBootTest` | Spring Boot test annotations and Mockito for mocking; integration test patterns are similar |
+| **Testing (frontend)** | `Jasmine` + `TestBed` | `Jest` + `Vue Test Utils` | Jest as test runner; Vue Test Utils for component mocking |
+| **DI container** | `.NET built-in DI` (Program.cs) | Spring DI (`@Component`, `@Service`, `@Repository`, `@Autowired`) | Use Spring annotations; ensure injection order is correct |
+| **Env config** | `appsettings.json` + `IConfiguration` | `application.properties` or `application.yml` (Spring) | Spring loads config automatically; use `@Value` or `@ConfigurationProperties` to inject |
+| **Auth mechanism** | `JWT` in `Authorization` header, validated in middleware | `JWT` in `Authorization` header, validated in Spring Security filter | Spring Security handles auth filters; JWT validation is similar |
+
+#### General Principles Across All Stacks
+
+| Principle | How to Apply | Notes |
+|-----------|---|---|
+| **Layering** | Domain → Application → Infrastructure → API | Structure holds regardless of language; folder organization may differ |
+| **Dependency direction** | Presentation → API → Application → Domain; Infrastructure ← all | Never reverse arrows; use interfaces to depend on contracts, not implementations |
+| **Testing** | Arrange-Act-Assert; test behavior, not implementation | Pattern is language-agnostic; frameworks change, principles don't |
+| **Async/await** | Always use for I/O-bound operations; never block | Node.js enforces async; Java has choices (blocking vs. reactive)—pick one and be consistent |
+| **DTO mapping** | Maps between layers (Domain ↔ API, Application ↔ API) | MapStruct (Java), AutoMapper (.NET), manual mapping (Node.js/Go); pattern is the same |
+| **Error handling** | Typed exceptions → HTTP status codes; never expose stack traces | All languages have exception mechanisms; map domain/app exceptions to HTTP status codes |
+| **State machines** | Named states + guarded transitions | Implement via enum + switch, or dedicated state-machine library; behavior is the same |
+| **Sequence diagrams** | Show layers, actors, and calls; include error paths | Diagrams are language-neutral; layer names in your architecture map to diagram boxes |
 
 3. **All structural definitions live in `../README.md` only.** Don't replicate them in task files or prompts. If the project structure changes, update the root README once and all templates automatically follow it.
 

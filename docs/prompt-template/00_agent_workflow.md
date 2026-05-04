@@ -30,12 +30,14 @@ For every task, follow this order without deviation:
    - Read the task `.md` file completely before writing any code.
    - Do not skim. Ensure all Design Rules, Edge Cases, and Verification Steps are understood.
 
-1.5 **Read and internalize the Sequence Diagram Reference**
+1.5 **Read and internalize the Sequence Diagram Reference (MANDATORY BLOCKER)**
+   - **Before proceeding to Step 2, check that the Sequence Diagram Reference section exists in the task file.**
+   - If the Sequence Diagram Reference section is missing, incomplete (no layer labels), or ambiguous: **STOP immediately**. Do not read further. Log it in PROGRESS.md Issues Log with specific evidence and ask for clarification before writing any code.
    - Read the Sequence Diagram Reference section in the task file completely.
    - Understand the exact layer each step happens in (layers defined in README.md Project Structure Reference).
    - Map each diagram step to the files and methods you will write.
-   - If any step is ambiguous, missing layer labels, or conflicts with other task sections, **STOP immediately** and log it in PROGRESS.md Issues Log with specific evidence before writing any code.
-   - **Critical rule:** You are not allowed to add logic that is not shown in the diagram, nor skip logic that is shown. The diagram is the contract.
+   - If any step conflicts with the Design Rule Checklist or other task sections, **STOP immediately** and log it in PROGRESS.md Issues Log with specific evidence before writing any code.
+   - **Critical contract rule:** You are not allowed to add logic that is not shown in the diagram, nor skip logic that is shown. The diagram is your contract. Every step must be implemented; every step must map to code. If the diagram is incomplete, the task is incomplete.
 
 2. **Read PROGRESS.md**
    - Read the latest `docs/sprint-N/PROGRESS.md`:

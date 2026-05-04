@@ -216,6 +216,35 @@ Every sequence diagram must show:
 - Any side effects (DB write, message broker publish, external call) as a labeled return message or async note.
 - **Incomplete diagrams** (missing alt branches, missing layer labels, or ambiguous step ownership) must be revised before the Sprint Design Document is considered complete and can be used for task breakdown.
 
+**Branch Completeness Checklist:**
+
+For each sequence diagram (use case / flow), verify you have included **at least** these branches:
+
+- ✅ **Happy path:** User/actor completes the flow successfully; system returns 200 OK (or appropriate success code)
+- ✅ **Input validation failure:** Actor provides invalid input (empty field, wrong format, out of range) → return 400 Bad Request + error payload
+- ✅ **Authentication failure:** Request missing or invalid auth token/session → return 401 Unauthorized
+- ✅ **Authorization failure:** Actor lacks permissions for the operation (e.g., non-owner cannot delete) → return 403 Forbidden
+- ✅ **Resource not found:** Actor references non-existent resource (e.g., course ID does not exist) → return 404 Not Found
+- ✅ **Business rule violation:** State transition guard fails (e.g., cannot borrow already-borrowed tool), cooldown active, duplicate entry, etc. → return 409 Conflict + reason
+- ✅ **External service timeout:** Call to payment gateway, email service, etc. takes too long or fails → return 503 Service Unavailable + retry guidance
+- ✅ **State machine guards:** If the flow updates entity state, show the exact guard condition and what happens if it fails (e.g., "Tool state is 'Borrowed'; cannot move to 'Available'" → rejected)
+- ⚠️ **Rate limiting:** If applicable per sprint scope, include 429 Too Many Requests branch for rate limit exceeded
+- ⚠️ **Conflict with data consistency:** If the flow can race (e.g., two concurrent requests for same resource), show the loser's path (e.g., "Request already processed by another user" → 409)
+
+**Branch Coverage Validation:**
+
+Before marking a diagram complete, ask:
+- "If every check passed, what is the success response?" (covered in happy path?)
+- "If input is invalid, what happens?" (covered?)
+- "If the user is not logged in, what happens?" (covered?)
+- "If the user lacks permission, what happens?" (covered?)
+- "If the resource doesn't exist, what happens?" (covered?)
+- "If a business rule blocks the action, what happens?" (covered?)
+- "If we call an external service and it times out, what happens?" (covered?)
+- "If the state machine forbids this transition, what happens?" (covered?)
+
+If any answer is "not shown in diagram," **the diagram is incomplete**. Revise before proceeding to task breakdown.
+
 Use a pattern similar to:
 
 ```md

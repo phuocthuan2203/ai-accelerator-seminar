@@ -1,0 +1,84 @@
+using System;
+using ToolLendingPlatform.Infrastructure.Data;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Session;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// ===== Configuration =====
+var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
+
+// ===== Add Services =====
+
+// Database
+builder.Services.AddDbContext<ToolLendingDbContext>(options =>
+    options.UseSqlite(connectionString));
+
+// Session management
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.IsEssential = true;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
+
+// Controllers
+builder.Services.AddControllers();
+
+// CORS (for local dev)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalhost", corsBuilder =>
+    {
+        corsBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
+
+// Distributed cache (required for sessions)
+builder.Services.AddDistributedMemoryCache();
+
+// Health checks (optional, for monitoring)
+builder.Services.AddHealthChecks();
+
+// ===== Build App =====
+var app = builder.Build();
+
+// ===== Database Migration =====
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ToolLendingDbContext>();
+    db.Database.Migrate();
+}
+
+// ===== Configure Middleware Pipeline =====
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+
+// Static files (frontend)
+app.UseStaticFiles();
+
+// CORS
+app.UseCors("AllowLocalhost");
+
+// Session middleware MUST come before routing
+app.UseSession();
+
+// Routing
+app.UseRouting();
+
+// Endpoints
+app.MapControllers();
+app.MapHealthChecks("/health");
+
+// Fallback: serve index.html for SPA (optional, for TASK-06+)
+app.MapFallbackToFile("index.html");
+
+app.Run("http://localhost:5000");

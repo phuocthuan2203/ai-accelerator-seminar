@@ -9,7 +9,7 @@
 
 | Task ID | Title | Status | Handoff Ready |
 |---------|-------|--------|---------------|
-| TASK-00 | Project Setup: ASP.NET Core + SQLite + Frontend Scaffold | ⬜ Not Started | No |
+| TASK-00 | Project Setup: ASP.NET Core + SQLite + Frontend Scaffold | ✅ Done | Yes |
 | TASK-01 | Domain Layer: User Entity + Exceptions | ⬜ Not Started | No |
 | TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ⬜ Not Started | No |
 | TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ⬜ Not Started | No |
@@ -42,7 +42,18 @@ Critical business rules that must not drift:
 (Updated after each task completion)
 
 ### After TASK-00
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- Backend project structure established: `backend/Domain/`, `backend/Application/Interfaces/`, `backend/Infrastructure/Data/`, `backend/Api/Controllers/`, `backend/Api/Middleware/`
+- `ToolLendingDbContext` registered in DI with SQLite connection
+- EF Core initial migration created (`Migrations/20260506133547_InitialCreate.cs`)
+- Database file created at `backend/tool_lending.db`
+- `HealthController` endpoint available at `/api/health` (returns 200 OK)
+- Session middleware configured with HTTP-only, secure cookies (30-min timeout)
+- CORS enabled for localhost development
+- Frontend static files served from `wwwroot/` directory
+- Ready for TASK-01 (domain entities and business logic)
 
 ---
 

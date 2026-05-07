@@ -1,5 +1,10 @@
 using System;
+using System.IO;
 using ToolLendingPlatform.Infrastructure.Data;
+using ToolLendingPlatform.Infrastructure.Repositories;
+using ToolLendingPlatform.Application.Services;
+using ToolLendingPlatform.Application.Interfaces;
+using ToolLendingPlatform.Api.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Session;
@@ -7,7 +12,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = Directory.GetCurrentDirectory()
+});
 
 // ===== Configuration =====
 var connectionString = builder.Configuration["ConnectionStrings:DefaultConnection"];
@@ -41,6 +50,18 @@ builder.Services.AddCors(options =>
 
 // Distributed cache (required for sessions)
 builder.Services.AddDistributedMemoryCache();
+
+// ===== Rule #11: Dependency Injection for Authentication =====
+
+// Repositories
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Application Services
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<AuthenticationService>();
+
+// Filters
+builder.Services.AddScoped<AuthExceptionFilter>(); // Rule #12
 
 // Health checks (optional, for monitoring)
 builder.Services.AddHealthChecks();

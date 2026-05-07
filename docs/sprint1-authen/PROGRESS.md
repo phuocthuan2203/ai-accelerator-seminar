@@ -13,7 +13,7 @@
 | TASK-01 | Domain Layer: User Entity + Exceptions | ✅ Done | Yes |
 | TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ✅ Done | Yes |
 | TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ✅ Done | Yes |
-| TASK-04 | API Layer: AuthController + DTOs + Middleware | ⬜ Not Started | No |
+| TASK-04 | API Layer: AuthController + DTOs + Middleware | ✅ Done | Yes |
 | TASK-05 | Frontend Services: AuthService + SessionManagement | ⬜ Not Started | No |
 | TASK-06 | Frontend UI: Registration & Login Pages + Forms | ⬜ Not Started | No |
 
@@ -135,7 +135,42 @@ Critical business rules that must not drift:
 ---
 
 ### After TASK-04
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- `AuthController.cs` in `backend/Api/Controllers/` implements two REST endpoints:
+  - `POST /api/auth/register` accepts username and password, returns 201 Created with user details
+  - `POST /api/auth/login` accepts username and password, returns 200 OK with user details
+  - Both endpoints validate input and delegate to AuthenticationService
+  - Session cookies created with HTTP-only, secure, 30-minute timeout
+- DTOs defined in `backend/Api/Dtos/`:
+  - `RegisterRequestDto` and `LoginRequestDto` with [Required] validation
+  - `RegisterResponseDto` with userId, username, createdAt, message
+  - `LoginResponseDto` with userId, username, message (no password)
+  - `ErrorResponseDto` for error responses
+- `AuthExceptionFilter.cs` in `backend/Api/Filters/` maps exceptions to HTTP responses:
+  - `DuplicateUsernameException` → 400 Bad Request with "Username already taken" message
+  - `AuthenticationException` → 401 Unauthorized with generic "Invalid username or password" message
+  - `InvalidUsernameException`, `InvalidPasswordException` → 400 Bad Request
+- `Program.cs` updated with DI registrations:
+  - `AddScoped<IUserRepository, UserRepository>()`
+  - `AddScoped<IPasswordHasher, PasswordHasher>()`
+  - `AddScoped<AuthenticationService>()`
+  - `AddScoped<AuthExceptionFilter>()`
+  - Session configuration with 30-min timeout, HTTP-only, secure flags
+- Integration tests in `backend/Tests/Api/AuthControllerTests.cs`:
+  - Register happy path (201 Created)
+  - Register validation errors (400 Bad Request)
+  - Register duplicate username (400 Bad Request)
+  - Login happy path (200 OK)
+  - Login user not found (401 Unauthorized)
+  - Login wrong password (401 Unauthorized)
+  - Cookie verification tests
+- Microsoft.AspNetCore.Mvc.Testing added for WebApplicationFactory support
+- Total tests now: 39-40 pass (8 domain + 10 infrastructure + 13 application + 9 API)
+- Build successful with 0 errors
+- All endpoints verified to return correct HTTP status codes
+- Ready for TASK-05 (Frontend authentication services and session management)
 
 ---
 

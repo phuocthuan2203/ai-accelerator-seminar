@@ -1,4 +1,10 @@
-const authService = new AuthService('http://localhost:5000');
+import AuthService from './auth.js';
+
+// Get the API URL from the current origin for consistency
+const protocol = window.location.protocol;
+const hostname = window.location.hostname;
+const apiUrl = `${protocol}//${hostname}:5123`;
+const authService = new AuthService(apiUrl);
 
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('login-form');

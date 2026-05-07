@@ -44,7 +44,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", corsBuilder =>
     {
-        corsBuilder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+        corsBuilder
+            .WithOrigins("http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:8123", "http://127.0.0.1:8123")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 

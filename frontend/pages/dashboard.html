@@ -24,10 +24,14 @@
         </main>
     </div>
 
-    <script src="../js/sessionManager.js"></script>
-    <script src="../js/auth.js"></script>
-    <script>
-        const authService = new AuthService('http://localhost:5000');
+    <script type="module">
+        import AuthService from '../js/auth.js';
+
+        // Get the API URL from the current origin for consistency
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const apiUrl = `${protocol}//${hostname}:5123`;
+        const authService = new AuthService(apiUrl);
         if (!authService.isAuthenticated()) {
             window.location.href = 'login.html';
         } else {

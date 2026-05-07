@@ -102,4 +102,4 @@ app.MapHealthChecks("/health");
 // Fallback: serve index.html for SPA (optional, for TASK-06+)
 app.MapFallbackToFile("index.html");
 
-app.Run("http://localhost:5000");
+app.Run("http://localhost:5123");

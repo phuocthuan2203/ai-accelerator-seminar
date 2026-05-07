@@ -86,29 +86,198 @@ Layouts: public-layout (navbar + footer + FAB shell)
 
 ---
 
-## Running the Project
+## Prerequisites
 
-### 1. Start Backend
+Before running the project, ensure you have the following installed:
+
+| Tool | Version | Purpose |
+|------|---------|---------|
+| .NET SDK | 9.0+ | Backend runtime & CLI |
+| Node.js | v22+ (optional) | Alternative HTTP server for frontend |
+| Python 3 | 3.8+ | HTTP server for frontend |
+| Git | Latest | Version control |
+
+### Installation by OS
+
+#### macOS
+```bash
+# Install via Homebrew
+brew install dotnet
+brew install node  # optional
+```
+
+#### Linux (Ubuntu/Debian)
+```bash
+# Install .NET SDK
+wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh
+chmod +x dotnet-install.sh
+./dotnet-install.sh
+
+# Install Node.js via NVM (optional)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+nvm install 22
+
+# Python 3 usually pre-installed
+python3 --version
+```
+
+#### Windows (PowerShell)
+```powershell
+# Install via Chocolatey (or download directly)
+choco install dotnet-sdk
+choco install nodejs  # optional
+
+# Or download from:
+# - .NET: https://dotnet.microsoft.com/download
+# - Node.js: https://nodejs.org/
+```
+
+---
+
+## Quick Start: Clone & Run
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/ai-accelerator-seminar.git
+cd ai-accelerator-seminar
+```
+
+### 2. Start the Backend
 
 ```bash
 cd backend
+
+# Restore dependencies and build
 dotnet build
-dotnet run --project Api
+
+# Run the API server
+dotnet run
 # Backend runs on http://localhost:5000
 # Swagger UI: http://localhost:5000/swagger
 ```
 
-### 2. Start Frontend (in another terminal)
+### 3. Start the Frontend (in another terminal)
 
 ```bash
 cd frontend
+
+# Option A: Python HTTP Server (recommended)
 python -m http.server 8000
-# Frontend runs on http://localhost:8000
+
+# Option B: Node.js HTTP Server (if installed)
+npx http-server -p 8000
 ```
 
-### 3. Access the Application
+### 4. Access the Application
 
-Open [http://localhost:8000](http://localhost:8000) in your browser.
+Open **[http://localhost:8000](http://localhost:8000)** in your browser.
+
+---
+
+## Testing the Application
+
+### Register & Login Flow
+
+1. Navigate to **Register page**: [http://localhost:8000/pages/register.html](http://localhost:8000/pages/register.html)
+2. Enter a username (3-50 chars, alphanumeric + underscore)
+3. Enter a password (6+ chars: 1 uppercase, 1 lowercase, 1 digit)
+4. Click **Create Account**
+5. Upon success, you'll be redirected to the Dashboard
+6. Click **Logout** to log out
+7. Go to **Login page**: [http://localhost:8000/pages/login.html](http://localhost:8000/pages/login.html)
+8. Log back in with your credentials
+
+### API Testing
+
+Use Swagger UI to test endpoints:
+- **Swagger**: [http://localhost:5000/swagger](http://localhost:5000/swagger)
+
+Or use `curl`:
+
+```bash
+# Register
+curl -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "Test1234"}'
+
+# Login
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "testuser", "password": "Test1234"}'
+```
+
+### Run Backend Tests
+
+```bash
+cd backend
+dotnet test
+```
+
+---
+
+## Project Status
+
+### ✅ Completed (Sprint 1: Authentication)
+
+**Backend Implementation:**
+- ✅ Domain Layer: User entity, business exceptions
+- ✅ Application Layer: AuthenticationService, PasswordHasher, validators
+- ✅ Infrastructure Layer: UserRepository with database migrations
+- ✅ API Layer: AuthController with REST endpoints, DTOs, exception filters
+- ✅ Database: SQLite with user schema and unique constraints
+
+**Frontend Implementation:**
+- ✅ Design System: CSS tokens, component library, shared styles
+- ✅ Services: AuthService with session management, SessionManager
+- ✅ Pages: Registration, Login, Dashboard with authentication guard
+- ✅ Forms: Real-time validation, error/success messaging
+- ✅ User flows: Register → Login → Dashboard → Logout
+
+**Features Implemented:**
+- User registration with password hashing (bcrypt)
+- User login with password verification
+- Session management via localStorage
+- Real-time form validation
+- Error handling (401 Unauthorized, 400 Duplicate, etc.)
+- Generic error messages (prevents username enumeration)
+- Password masking in form inputs
+- Dashboard with welcome message and logout
+
+**Test Coverage:**
+- Domain: 8 tests ✓
+- Infrastructure: 10 tests ✓
+- Application: 13 tests ✓
+- API: 9+ tests ✓
+- Frontend: 15 tests ✓
+- **Total: 55+ passing tests**
+
+### 🔄 In Progress
+
+None at this time.
+
+### 📋 Next Steps (Sprint 2 & Beyond)
+
+- [ ] **Sprint 2: Tool Management**
+  - [ ] Tool entity and repository
+  - [ ] Upload/create tool API endpoints
+  - [ ] Tool listing and filtering
+  - [ ] Tool detail page UI
+
+- [ ] **Sprint 3: Borrowing & Returns**
+  - [ ] Borrow request workflow
+  - [ ] Return tracking
+  - [ ] Notification system
+
+- [ ] **Sprint 4: Search & Discovery**
+  - [ ] Tool search functionality
+  - [ ] Category browsing
+  - [ ] Advanced filtering
+
+- [ ] **Sprint 5: Reviews & Ratings**
+  - [ ] User reviews
+  - [ ] Tool ratings
+  - [ ] Recommendation engine
 
 ---
 

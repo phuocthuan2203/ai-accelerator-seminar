@@ -11,7 +11,7 @@
 |---------|-------|--------|---------------|
 | TASK-00 | Project Setup: ASP.NET Core + SQLite + Frontend Scaffold | ✅ Done | Yes |
 | TASK-01 | Domain Layer: User Entity + Exceptions | ✅ Done | Yes |
-| TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ⬜ Not Started | No |
+| TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ✅ Done | Yes |
 | TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ⬜ Not Started | No |
 | TASK-04 | API Layer: AuthController + DTOs + Middleware | ⬜ Not Started | No |
 | TASK-05 | Frontend Services: AuthService + SessionManagement | ⬜ Not Started | No |
@@ -75,7 +75,23 @@ Critical business rules that must not drift:
 ---
 
 ### After TASK-02
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- `IUserRepository.cs` interface defined in `backend/Application/Interfaces/` with three async methods:
+  - `GetByUsernameAsync(string username)` — returns User or null
+  - `SaveAsync(User user)` — persists user to database
+  - `ExistsAsync(string username)` — lightweight existence check
+- `UserRepository.cs` implementation created in `backend/Infrastructure/Repositories/` using EF Core LINQ
+- All repository methods use parameterized EF LINQ queries (no SQL injection risk)
+- Database migration already exists from TASK-00 with correct schema:
+  - Users table with Id (PK), Username (UNIQUE, NOT NULL), PasswordHash (NOT NULL)
+  - CreatedAt, UpdatedAt with CURRENT_TIMESTAMP defaults
+  - Unique index on Username column
+- Integration tests implemented in `backend/Tests/Infrastructure/UserRepositoryTests.cs` (10 tests pass)
+- Microsoft.EntityFrameworkCore.InMemory added for test support
+- Total tests now: 18 pass ✓ (8 domain + 10 infrastructure)
+- Ready for TASK-03 (PasswordHasher, AuthenticationService)
 
 ---
 

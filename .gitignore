@@ -20,3 +20,7 @@ Thumbs.db
 
 # Documentation (local only)
 docs/seminar-content.md
+
+# Node modules
+node_modules/
+package-lock.json

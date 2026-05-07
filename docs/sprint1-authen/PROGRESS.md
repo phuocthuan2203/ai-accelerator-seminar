@@ -15,7 +15,7 @@
 | TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ✅ Done | Yes |
 | TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ✅ Done | Yes |
 | TASK-04 | API Layer: AuthController + DTOs + Middleware | ✅ Done | Yes |
-| TASK-05 | Frontend Services: AuthService + SessionManagement | ⬜ Not Started | No |
+| TASK-05 | Frontend Services: AuthService + SessionManagement | ✅ Done | Yes |
 | TASK-06 | Frontend UI: Registration & Login Pages + Forms | ⬜ Not Started | No |
 
 **Status legend:** ⬜ Not Started · 🔄 In Progress · ✅ Done · 🚫 Blocked
@@ -218,7 +218,49 @@ Critical business rules that must not drift:
 ---
 
 ### After TASK-05
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- `SessionManager.js` in `frontend/js/sessionManager.js`:
+  - `set(sessionData)` — stores userId and username in localStorage
+  - `get()` — retrieves session object or null
+  - `exists()` — checks if session exists
+  - `clear()` — removes session from storage
+  - `getUserId()` and `getUsername()` — accessor methods
+- `AuthService.js` in `frontend/js/auth.js`:
+  - `constructor(apiBaseUrl, sessionManager)` — accepts configurable API endpoint
+  - `register(username, password): Promise` — calls POST /api/auth/register, stores session on 201
+  - `login(username, password): Promise` — calls POST /api/auth/login, stores session on 200
+  - `isAuthenticated(): bool` — checks if session exists
+  - `getSessionUserId(): int | null` — retrieves current user ID from session
+  - `getSessionUsername(): string | null` — retrieves current username from session
+  - `logout()` — clears session from storage
+  - `restoreSession(): bool` — checks if session was restored from storage on page reload
+- `package.json` created with Jest 29.7.0 configuration for frontend testing
+- `jest.config.js` created with ESM support and jsdom environment
+- `jest.setup.js` created to import @jest/globals for ESM tests
+- Unit tests in `tests/frontend/auth.service.spec.js`:
+  - 4 register tests: happy path, error handling (3 cases: 400, 500, network)
+  - 4 login tests: happy path, error handling (3 cases: 401, 400, 500, network)
+  - 7 session management tests: isAuthenticated, userId/username retrieval, session persistence, logout
+  - All 15 tests pass ✓
+- **Three-Gate Verification:**
+  - Gate 1 ✅ — All 15 tests pass, 0 skipped, 0 empty tests
+  - Gate 2 ✅ — Frontend service layer 100% coverage (all methods tested)
+  - Gate 3 ✅ — All 8 edge cases from task mapped to tests:
+    | Edge Case | Test Method | Status |
+    |-----------|-------------|--------|
+    | Register 400 response | `should throw error on register failure` | ✓ |
+    | Register 500 response | `should handle register 500 error` | ✓ |
+    | Register network error | `should handle network error during register` | ✓ |
+    | Login 401 response | `should handle login 401 error with generic message` | ✓ |
+    | Login 500 response | `should handle login 500 error` | ✓ |
+    | No session in storage | `should return false when not authenticated` | ✓ |
+    | No userId in session | `should return null when no userId in session` | ✓ |
+    | Session persists on reload | `should restore session from storage` | ✓ |
+- Frontend services fully decouple HTTP details from UI components
+- Session data persists across page reloads via localStorage
+- Ready for TASK-06 (Frontend UI: RegistrationPage + LoginPage will use AuthService)
 
 ---
 

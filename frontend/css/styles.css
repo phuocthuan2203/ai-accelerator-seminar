@@ -1,101 +1,112 @@
+/* Global Styles & Layout Utilities */
+/* Uses design tokens from design-tokens.css */
+
+@import url('./design-tokens.css');
+@import url('./components.css');
+
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html, body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    line-height: 1.6;
-    color: #333;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  color: var(--color-ink);
 }
 
 body {
-    background-color: #f8f9fa;
+  background-color: var(--color-bg);
 }
 
 #app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 header {
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    padding: 1rem;
-}
-
-.navbar {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.navbar h1 {
-    font-size: 1.5rem;
-    color: #2c3e50;
+  background: white;
+  box-shadow: var(--shadow-sm);
+  padding: 1rem;
 }
 
 main {
-    flex: 1;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
-    padding: 2rem 1rem;
+  flex: 1;
+  max-width: var(--container-width);
+  margin: 0 auto;
+  width: 100%;
+  padding: 2rem 1rem;
 }
 
-/* Form styles (used in TASK-06) */
-form {
-    background: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 500px;
-    margin: 0 auto;
+/* Layout Utilities */
+
+.container-app {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
 }
 
-form label {
-    display: block;
-    margin: 1rem 0 0.5rem;
-    font-weight: 500;
+.section-pad {
+  padding: var(--section-padding-lg) 0;
 }
 
-form input {
-    width: 100%;
-    padding: 0.75rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1rem;
+.section-pad-sm {
+  padding: var(--section-padding-md) 0;
 }
 
-form button {
-    width: 100%;
-    padding: 0.75rem;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s;
+/* Section background alternation classes */
+.bg-section-hero,
+.bg-section-2 {
+  background-color: var(--color-bg);
 }
 
-form button:hover {
-    background: #2980b9;
+.bg-section-1,
+.bg-section-3 {
+  background-color: white;
 }
 
+/* Back button styling (required by DESIGN-SYSTEM-v2.md) */
+.back-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-label-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Animations */
+
+@keyframes pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(244, 63, 94, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s infinite;
+}
+
+/* Error and success message styles */
 .error {
-    color: #e74c3c;
-    font-size: 0.875rem;
-    margin-top: -0.5rem;
-    margin-bottom: 1rem;
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
 }
 
 .success {
-    color: #27ae60;
-    font-size: 0.875rem;
+  color: #27ae60;
+  font-size: 0.875rem;
 }

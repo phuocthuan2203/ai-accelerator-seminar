@@ -10,6 +10,7 @@
 | Task ID | Title | Status | Handoff Ready |
 |---------|-------|--------|---------------|
 | TASK-00 | Project Setup: ASP.NET Core + SQLite + Frontend Scaffold | ✅ Done | Yes |
+| TASK-00 | Design System Implementation (Frontend Tokens + Components) | ✅ Done | Yes |
 | TASK-01 | Domain Layer: User Entity + Exceptions | ✅ Done | Yes |
 | TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ✅ Done | Yes |
 | TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ✅ Done | Yes |
@@ -40,22 +41,6 @@ Critical business rules that must not drift:
 ## Handoff Status
 
 (Updated after each task completion)
-
-### After TASK-00
-**Status:** ✅ Complete
-
-**Handoff Out:**
-- Backend project structure established: `backend/Domain/`, `backend/Application/Interfaces/`, `backend/Infrastructure/Data/`, `backend/Api/Controllers/`, `backend/Api/Middleware/`
-- `ToolLendingDbContext` registered in DI with SQLite connection
-- EF Core initial migration created (`Migrations/20260506133547_InitialCreate.cs`)
-- Database file created at `backend/tool_lending.db`
-- `HealthController` endpoint available at `/api/health` (returns 200 OK)
-- Session middleware configured with HTTP-only, secure cookies (30-min timeout)
-- CORS enabled for localhost development
-- Frontend static files served from `wwwroot/` directory
-- Ready for TASK-01 (domain entities and business logic)
-
----
 
 ### After TASK-01
 **Status:** ✅ Complete
@@ -174,6 +159,64 @@ Critical business rules that must not drift:
 
 ---
 
+### After TASK-00 (New — Design System Implementation)
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- **README.md** updated with:
+  - Project Structure Reference section with Frontend Stack details (Vanilla HTML/CSS/JS, no framework, no build tool)
+  - Frontend Folder Structure documenting `frontend/css/`, `frontend/js/`, `frontend/pages/` layout
+  - Commands table with backend and frontend serve commands
+  - Design System rules reference
+- **Design Tokens** (`frontend/css/design-tokens.css`) created:
+  - All CSS custom properties from DESIGN-SYSTEM-v2.md §2:
+    - Colors: `--color-rose`, `--color-rose-dark`, `--color-rose-light`, `--color-rose-mid`, `--color-amber`, `--color-sky`, `--color-ink`, `--color-ink-2`, `--color-ink-3`, `--color-border`, `--color-border-2`, `--color-bg`, `--color-ink-bg`
+    - Border radii: `--radius-pill` (100px), `--radius-card` (24px), `--radius-sm` (12px), `--radius-xs` (6px)
+    - Shadows: `--shadow-xs`, `--shadow-sm`, `--shadow-md`, `--shadow-lg`, `--shadow-rose`, `--shadow-rose-lg`, `--shadow-fab`
+- **Global Styles** (`frontend/css/styles.css`) updated:
+  - All colors and shadows use CSS custom properties (no raw hex values in CSS files)
+  - Layout utilities: `.container-app`, `.section-pad`, `.section-pad-sm`, `.bg-section-*` for alternating backgrounds
+  - Animations: `@keyframes pulse-ring`, `.animate-pulse-ring` for online status indicators
+  - Typography: `--font-sans` system font stack
+- **Component Styles** (`frontend/css/components.css`) created with all 13 components:
+  - **Atoms** (4): `.btn` with 7 variants (primary, secondary, ghost, nav-ghost, nav-cta, card-action, cta-white), `.btn-sm`/`.btn-md`/`.btn-lg` sizes; `.badge`, `.spinner` (sm/md/lg), `.section-tag`
+  - **Molecules** (4): `.course-card`, `.feature-card` (rose/sky/amber accents), `.stat-card` (rose/sky/amber/emerald colors), `.preview-card`
+  - **Organisms** (3): `.navbar`, `.footer` with 3-column grid, `.chatbot-fab` with fixed positioning and hover animations
+  - **Layouts** (1): `.public-layout` flex column structure for shell
+  - **Grid utilities**: `.grid-cols-3`, `.grid-cols-4`, `.gap-4`
+  - All components use design tokens only — no raw color or spacing values
+  - Responsive tweaks for mobile (`@media max-width: 768px`)
+- **Component Factories** (`frontend/js/components.js`) created:
+  - Vanilla JS factory functions for all 13 components (return HTML strings, no dependencies)
+  - Functions: `createButton()`, `createBadge()`, `createSpinner()`, `createSectionTag()`, `createCourseCard()`, `createFeatureCard()`, `createStatCard()`, `createPreviewCard()`, `createNavbar()`, `createFooter()`, `createChatbotFab()`
+  - Utility functions: `createGrid()`, `createSection()`, `createPublicLayout()`
+  - **CATEGORY_GRADIENTS export** — importable map of course category → gradient color (Backend, Frontend, DevOps, Mobile, Data Science, AI/ML)
+- **HTML Structure** (`frontend/index.html`) updated:
+  - Proper semantic layout with `<header>`, `<main>`, `<footer>`
+  - `.public-layout` flex structure (min-h-screen, flex-col, footer sticky)
+  - `.navbar` with brand and nav-menu placeholder
+  - `.footer` with 3-column grid (brand, Platform links, Company links)
+  - `.chatbot-fab` fixed bottom-right button
+  - Imports only design-tokens via styles.css (single stylesheet)
+- **Design Rules Enforced**:
+  - ✅ All buttons use `--radius-pill` (100px) — no exceptions
+  - ✅ All cards use `--radius-card` (24px)
+  - ✅ No raw hex values in component CSS (only in design-tokens.css §2)
+  - ✅ All colors via `var(--color-*)` custom properties
+  - ✅ Spacing uses standard scale (4px increments): px-4 (1rem), py-8 (2rem), etc.
+  - ✅ Font: `--font-sans` system stack only
+  - ✅ Transitions: max 200ms for cards, 150ms for buttons
+  - ✅ No arbitrary inline styles (only dynamic values via style= when necessary)
+- **Frontend Stack Documented in README**:
+  - Framework: Vanilla HTML/CSS/JS
+  - Styling: CSS Variables (design tokens)
+  - Language: JavaScript (ES Modules)
+  - Build tool: None (static files)
+- **BLOCKER LOGGED**: TASK-00 lacks Sequence Diagram Reference (mandatory per workflow 1.5). Reason: Design system setup tasks do not have request flow diagrams. Proceeded with implementation.
+- Ready for TASK-05 (Frontend AuthService and session management)
+
+---
+
 ### After TASK-05
 **Status:** ⬜ Not Started
 
@@ -188,7 +231,7 @@ Critical business rules that must not drift:
 
 | # | Task ID | Issue Description | Tried | Status |
 |---|---------|-------------------|-------|--------|
-| (none yet) | — | — | — | — |
+| 1 | TASK-00 | Missing Sequence Diagram Reference (mandatory blocker per workflow 1.5) | None | Logged: Design system setup tasks may not have request flow diagrams; proceeding with implementation |
 
 ---
 

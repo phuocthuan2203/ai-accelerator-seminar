@@ -1,0 +1,47 @@
+/* Design System Tokens — Variant B (Soft Rounded / Consumer) */
+/* All colors, radii, and shadows defined per DESIGN-SYSTEM-v2.md §2 */
+
+:root {
+  /* Colors */
+  --color-rose: #F43F5E;
+  --color-rose-dark: #E11D48;
+  --color-rose-light: #FFF1F3;
+  --color-rose-mid: #FECDD3;
+
+  --color-amber: #F59E0B;
+  --color-sky: #0EA5E9;
+  --color-emerald: #10B981;
+
+  --color-ink: #18181B;
+  --color-ink-2: #52525B;
+  --color-ink-3: #A1A1AA;
+
+  --color-border: #F4F4F5;
+  --color-border-2: #E4E4E7;
+  --color-bg: #FAFAFA;
+  --color-ink-bg: #18181B; /* footer background */
+
+  /* Border Radii */
+  --radius-pill: 100px;
+  --radius-card: 24px;
+  --radius-sm: 12px;
+  --radius-xs: 6px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-rose: 0 0 20px rgba(244, 63, 94, 0.3);
+  --shadow-rose-lg: 0 0 40px rgba(244, 63, 94, 0.4);
+  --shadow-fab: 0 8px 16px rgba(0, 0, 0, 0.15);
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Layout utilities */
+  --container-width: 1120px;
+  --container-padding: 28px;
+  --section-padding-lg: 80px;
+  --section-padding-md: 48px;
+}

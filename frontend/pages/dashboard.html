@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Tool Lending Platform</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <nav class="navbar">
+                <h1>Tool Lending Platform</h1>
+                <div id="nav-menu">
+                    <span id="welcome-message">Welcome, <strong id="username"></strong>!</span>
+                    <a href="#" id="logout-link">Logout</a>
+                </div>
+            </nav>
+        </header>
+
+        <main id="main-content">
+            <h2>Dashboard</h2>
+            <p>Welcome to your Tool Lending Dashboard! (Content to be filled in future sprints)</p>
+        </main>
+    </div>
+
+    <script src="../js/sessionManager.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const authService = new AuthService('http://localhost:5000');
+        if (!authService.isAuthenticated()) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('username').textContent = authService.getSessionUsername() || 'User';
+
+            document.getElementById('logout-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                authService.logout();
+                window.location.href = 'login.html';
+            });
+        }
+    </script>
+</body>
+</html>

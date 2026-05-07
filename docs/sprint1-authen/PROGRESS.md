@@ -10,7 +10,7 @@
 | Task ID | Title | Status | Handoff Ready |
 |---------|-------|--------|---------------|
 | TASK-00 | Project Setup: ASP.NET Core + SQLite + Frontend Scaffold | ✅ Done | Yes |
-| TASK-01 | Domain Layer: User Entity + Exceptions | ⬜ Not Started | No |
+| TASK-01 | Domain Layer: User Entity + Exceptions | ✅ Done | Yes |
 | TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ⬜ Not Started | No |
 | TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ⬜ Not Started | No |
 | TASK-04 | API Layer: AuthController + DTOs + Middleware | ⬜ Not Started | No |
@@ -58,7 +58,19 @@ Critical business rules that must not drift:
 ---
 
 ### After TASK-01
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- `User.cs` domain entity created in `backend/Domain/User.cs` with immutable properties (private setters)
+- User constructor validates username and password hash, throwing appropriate exceptions
+- Four custom exceptions defined in `backend/Domain/Exceptions/`:
+  - `InvalidUsernameException` — thrown when username is null/empty
+  - `InvalidPasswordException` — thrown when password hash is null/empty
+  - `DuplicateUsernameException` — thrown when username already exists (used by TASK-02/TASK-03)
+  - `AuthenticationException` — thrown on login failure with generic message (used by TASK-03)
+- Unit tests implemented in `backend/Tests/Domain/UserTests.cs` (8 tests pass)
+- xUnit test framework added to project
+- Ready for TASK-02 (infrastructure layer: UserRepository + migrations)
 
 ---
 

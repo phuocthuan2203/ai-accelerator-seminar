@@ -1,1 +1,22 @@
+# Build artifacts
+bin/
+obj/
+*.db
+*.dll
+*.exe
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.sln.user
+
+# Config
+appsettings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation (local only)
 docs/seminar-content.md

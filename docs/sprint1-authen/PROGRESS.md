@@ -12,7 +12,7 @@
 | TASK-00 | Project Setup: ASP.NET Core + SQLite + Frontend Scaffold | ✅ Done | Yes |
 | TASK-01 | Domain Layer: User Entity + Exceptions | ✅ Done | Yes |
 | TASK-02 | Infrastructure Layer: UserRepository + SQLite Migration | ✅ Done | Yes |
-| TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ⬜ Not Started | No |
+| TASK-03 | Application Layer: AuthenticationService + PasswordHasher | ✅ Done | Yes |
 | TASK-04 | API Layer: AuthController + DTOs + Middleware | ⬜ Not Started | No |
 | TASK-05 | Frontend Services: AuthService + SessionManagement | ⬜ Not Started | No |
 | TASK-06 | Frontend UI: Registration & Login Pages + Forms | ⬜ Not Started | No |
@@ -96,7 +96,41 @@ Critical business rules that must not drift:
 ---
 
 ### After TASK-03
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
+
+**Handoff Out:**
+- `IPasswordHasher.cs` interface defined in `backend/Application/Interfaces/` with two async methods:
+  - `HashAsync(string plaintext)` — hashes password using bcrypt (salt rounds = 10)
+  - `VerifyAsync(string plaintext, string hash)` — verifies plaintext against hash using constant-time comparison
+- `PasswordHasher.cs` implementation in `backend/Application/Services/` using BCrypt.Net library
+  - Uses bcrypt algorithm with salt rounds ≥ 10 per security best practices
+  - Implements constant-time comparison via BCrypt.Net.BCrypt.Verify() to prevent timing attacks
+  - Throws ArgumentException for null/empty passwords
+- `PasswordValidator.cs` in `backend/Application/Validators/` enforces password strength:
+  - Minimum 6 characters
+  - At least 1 uppercase letter
+  - At least 1 lowercase letter
+  - At least 1 digit
+- `UsernameValidator.cs` in `backend/Application/Validators/` enforces username format:
+  - Minimum 3 characters, maximum 50 characters
+  - Only alphanumeric and underscore characters allowed
+- `AuthenticationService.cs` in `backend/Application/Services/` orchestrates authentication flows:
+  - `RegisterAsync(username, password)` validates input → checks uniqueness → hashes password → creates User entity → saves via repository
+  - `LoginAsync(username, password)` validates input → queries user by username → verifies password with constant-time compare → returns user
+  - Throws appropriate exceptions: `InvalidUsernameException`, `InvalidPasswordException`, `DuplicateUsernameException`, `AuthenticationException`
+  - All auth errors return generic message "Invalid username or password" to prevent username enumeration
+- Moq library (v4.20.70) added to project for mocking in integration tests
+- Integration tests implemented in `backend/Tests/Application/AuthenticationServiceTests.cs` (9 tests):
+  - Register happy path, username validation (3 rules), password validation (3 rules), duplicate username detection
+  - Login happy path, user not found with generic message, wrong password with generic message
+- Unit tests implemented in `backend/Tests/Application/PasswordHasherTests.cs` (4 tests):
+  - Hash produces non-plaintext output with bcrypt format
+  - Verify accepts correct password, rejects incorrect password
+  - Timing consistency documented (constant-time comparison verified)
+- Total tests now: 31 pass ✓ (8 domain + 10 infrastructure + 13 application)
+- Build successful with 0 errors
+- Backend API starts successfully on port 5000
+- Ready for TASK-04 (API layer: AuthController + DTOs + HTTP response mapping)
 
 ---
 
